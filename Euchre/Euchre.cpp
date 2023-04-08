@@ -16,9 +16,22 @@ using namespace std;
 
 class Trick {
 public:
-    vector<Card> cards;
+    vector<Card> Cards;
+    vector<Card> TrumpCards;
+    vector<Player> Players;
     Card trump;
+    bool CheckForTrump();
 };
+
+bool Trick::CheckForTrump() {
+    for (const auto& card : Cards) {
+        if (card.getSuit() == trump.getSuit()) {
+            TrumpCards.push_back(card);
+        }
+    }
+    return !TrumpCards.empty();
+}
+
 
 void DealCards(int CardsPerPerson, Deck& deck, Player& player1, Player& player2, Player& player3, Player& player4) {
     // Deal CardsPerPerson cards to each player and set the trump card
@@ -37,7 +50,6 @@ bool Bid(vector<Player> Players)
     for (int i = 0; i < Players.size(); i ++ ) {
 
         int random_num = rand() % 100 + 1;
-        cout << random_num << endl;
         if (random_num > 50) {
             cout << Players[i].getName() << " called trump" << endl;
             return true;
@@ -45,6 +57,8 @@ bool Bid(vector<Player> Players)
         else
             cout << Players[i].getName() << " passed" << endl;
     }
+
+    cout << "No players called trump" << endl;
     return false;
 }
 
@@ -66,30 +80,89 @@ void Redeal(vector<Player> Players, Deck deck)
     Bid(Players);
 }
 
-void playTrick(vector<Player>& players, Trick& trick, const Card& leadingCard)
+//void playTrick(vector<Player>& players, Trick& trick, const Card& leadingCard)
+//{
+//    // Clear the cards from the previous trick
+//    trick.Cards.clear();
+//    trick.Players.clear();
+//
+//    // Add the leading card to the trick
+//    trick.Cards.push_back(leadingCard);
+//    trick.Players.push_back(players[0]);
+//
+//    int currentPlayerIndex = 1;
+//    int currentHighCardIndex = 0;
+//
+//    for (int i = 0; i < 3; i++) {
+//        currentPlayerIndex = (currentPlayerIndex + 1) % 4;
+//        Player& currentPlayer = players[currentPlayerIndex];
+//        Card playedCard = currentPlayer.playCard(leadingCard.getSuit());
+//
+//        cout << currentPlayer.getName() <<
+//            " played " << playedCard.getRank() << " of " << playedCard.getSuit() << endl;
+//        // Add the played card to the trick and record the player who played it
+//        trick.Cards.push_back(playedCard);
+//        trick.Players.push_back(currentPlayer);
+//
+//        // If the played card is of the same suit as the leading card and has a higher rank, update the current high card index
+//        if (playedCard.getSuit() == leadingCard.getSuit() && playedCard.getValue() > trick.Cards[currentHighCardIndex].getValue()) {
+//            currentHighCardIndex = i + 1;
+//        }
+//    }
+//    
+//
+//    if (trick.CheckForTrump()) {
+//        cout << "A trump card was played this trick" << endl;
+//    }
+//    else //If a trump card was not played the point goes to the highest card
+//    {
+//        cout << "A trump card was not played this trick" << endl;
+//        // Award a point to the player who played the highest card
+//        trick.Players[currentHighCardIndex].increaseScore();
+//
+//        cout << "The winning card is " << trick.Cards[currentHighCardIndex].getRank() << " of " << trick.Cards[currentHighCardIndex].getSuit() << endl;
+//    }
+//}
+
+Trick playTrick(vector<Player>& players, Trick& trick, const Card& leadingCard)
 {
     // Clear the cards from the previous trick
-    trick.cards.clear();
+    trick.Cards.clear();
+    trick.Players.clear();
 
     // Add the leading card to the trick
-    trick.cards.push_back(leadingCard);
+    trick.Cards.push_back(leadingCard);
+    trick.Players.push_back(players[0]);
 
-    int currentPlayerIndex = 0;
-    int currentHighCardIndex = 0;
+    int currentPlayerIndex = 1;
 
     for (int i = 0; i < 3; i++) {
         currentPlayerIndex = (currentPlayerIndex + 1) % 4;
         Player& currentPlayer = players[currentPlayerIndex];
         Card playedCard = currentPlayer.playCard(leadingCard.getSuit());
 
-        // Add the played card to the trick
-        trick.cards.push_back(playedCard);
-
-        // If the played card is of the same suit as the leading card and has a higher rank, update the current high card index
-        if (playedCard.getSuit() == leadingCard.getSuit() && playedCard.getRank() > trick.cards[currentHighCardIndex].getRank()) {
-            currentHighCardIndex = i + 1;
-        }
+        cout << currentPlayer.getName() <<
+            " played " << playedCard.getRank() << " of " << playedCard.getSuit() << endl;
+        // Add the played card to the trick and record the player who played it
+        trick.Cards.push_back(playedCard);
+        trick.Players.push_back(currentPlayer);
     }
+
+    return trick;
+
+    //// Determine the winner of the trick using the calculateWinner function
+    //int winnerIndex = calculateWinner(trick);
+
+    //if (trick.CheckForTrump()) {
+    //    cout << "A trump card was played this trick" << endl;
+    //}
+    //else //If a trump card was not played the point goes to the highest card
+    //{
+    //    cout << "A trump card was not played this trick" << endl;
+    //    // Award a point to the player who played the highest card
+    //    trick.Players[winnerIndex].increaseScore();
+    //    cout << "The winning card is " << trick.Cards[winnerIndex].getRank() << " of " << trick.Cards[winnerIndex].getSuit() << endl;
+    //}
 }
 
 // Define the function to calculate the winner of a trick
@@ -98,8 +171,8 @@ int calculateWinner(Trick trick) {
     int winnerIndex = 0;
 
     // Loop through the cards in the trick
-    for (int i = 0; i < trick.cards.size(); i++) {
-        Card card = trick.cards[i];
+    for (int i = 0; i < trick.Cards.size(); i++) {
+        Card card = trick.Cards[i];
         int value = card.getValue();
 
         // If the card is of the trump suit, multiply its value by 10
@@ -163,10 +236,9 @@ int main()
     Players.push_back(Team1.getPlayers()[1]);
     Players.push_back(Team2.getPlayers()[0]);
     
-
-    std::cout << "Players in Team 1:\n" 
+    std::cout << "Team 1: " 
         << Team1.getPlayers()[0].getName() << " & " << Team1.getPlayers()[1].getName() << "\n"
-        << "Players in Team 2:\n" 
+        << "Team 2: " 
         << Team2.getPlayers()[0].getName() << " & " << Team2.getPlayers()[1].getName() << std::endl;
 
     Deck deck;
@@ -174,6 +246,7 @@ int main()
     // Shuffle the deck
     deck.Shuffle();
 
+    cout << "\nDealing Phase\n---------------" << endl;
     int DealerIndex = 0;
     cout << Players[DealerIndex].getName() << " is dealing" << endl;
 
@@ -183,19 +256,33 @@ int main()
     DealCards(3, deck, Players[0], Players[1], Players[2], Players[3]); //Deal 3 cards
 
     trick.trump = deck.DrawCard();
-    cout<<"Trump = "<< trick.trump.getSuit() << std::endl;
+    cout<<"\nTrump = "<< trick.trump.getSuit() << std::endl;
 
-    for (const auto& player : Players) {
-        player.printPlayerHand();
-    }
-
-    Card firstPlayed = Players[toTheLeft(DealerIndex, Players)].getHand()[0];
-    cout<< "The first played card is:\n" << firstPlayed.getRank() << " of " << firstPlayed.getSuit() << " (value: " << firstPlayed.getValue() << ")" << 
-        "\nPlayed by: " << Players[toTheLeft(DealerIndex, Players)].getName() << endl;
-
-    playTrick(Players, trick, firstPlayed);
-
+    cout << "\nBidding Phase\n---------------" << endl;
     if (Bid(Players) == false) { Redeal(Players, deck); }
+
+    int NumTrick = 1;
+    cout << "\nTrick #"<< NumTrick << "\n---------------" << endl;
+    Card firstPlayed = Players[toTheLeft(DealerIndex, Players)].getHand()[0];
+    cout << Players[toTheLeft(DealerIndex, Players)].getName() <<
+        " played " << firstPlayed.getRank() << " of " << firstPlayed.getSuit() << endl;
+
+    trick = playTrick(Players, trick, firstPlayed);
+
+    // Determine the winner of the trick using the calculateWinner function
+    int winnerIndex = calculateWinner(trick);
+
+    if (trick.CheckForTrump()) {
+        cout << "A trump card was played this trick" << endl;
+    }
+    else //If a trump card was not played the point goes to the highest card
+    {
+        cout << "A trump card was not played this trick" << endl;
+        // Award a point to the player who played the highest card
+        trick.Players[winnerIndex].increaseScore();
+
+        cout << "The winning card is " << trick.Cards[winnerIndex].getRank() << " of " << trick.Cards[winnerIndex].getSuit() << endl;
+    }
 
 
     return 0;
