@@ -29,21 +29,21 @@ Deck::Deck() : currentCardIndex(0) {
     }
 }
 
-void Deck::shuffle() {
+void Deck::Shuffle() {
     // Shuffle the deck using the Fisher-Yates algorithm
     unsigned seed = std::chrono::system_clock::now().time_since_epoch().count();
     std::shuffle(deck.begin(), deck.end(), std::default_random_engine(seed));
     currentCardIndex = 0;
 }
 
-Card Deck::drawCard() {
+Card Deck::DrawCard() {
     // Return the next card in the deck and increment the counter
     Card card = deck[currentCardIndex];
     ++currentCardIndex;
     return card;
 }
 
-void Deck::printDeck()
+void Deck::PrintDeck()
 {
     for (int i = 0; i < deck.size(); i++) {
         std::cout << deck[i].getRank() << " of " << deck[i].getSuit() << " (value: " << deck[i].getValue() << ")" << std::endl;

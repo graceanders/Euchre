@@ -27,6 +27,8 @@ void Player::increaseScore() { score++; }
 void Player::setHand(std::vector<Card>hand) { this->hand = hand; }
 void Player::addCardToHand(Card card) { hand.push_back(card); }
 
+void Player::clearHand(std::vector<Card>hand) { hand.clear(); }
+
 //Been having issues with getting a "removeCardFromHand" to work tried a few methods and it always goes back to an issue with '=='
 //void Player::removeCardFromHand(Card card)
 //{

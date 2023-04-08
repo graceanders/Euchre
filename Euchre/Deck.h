@@ -15,9 +15,9 @@ class Deck {
 public:
 	Deck();
 
-	void shuffle();
-	Card drawCard();
-	void printDeck();
+	void Shuffle();
+	Card DrawCard();
+	void PrintDeck();
 private:
 	std::vector<Card> deck;
 	int currentCardIndex;

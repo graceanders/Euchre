@@ -24,6 +24,7 @@ public:
 
     void setHand(std::vector<Card> hand);
     void addCardToHand(Card card);
+    void clearHand(std::vector<Card> hand);
     //void removeCardFromHand(Card card);
     std::vector<Card> getHand() const;
     void printPlayerHand() const;
