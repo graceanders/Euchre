@@ -110,11 +110,12 @@ Trick playTrick(vector<Player>& players, Trick& trick, const Card& leadingCard)
         Card playedCard = currentPlayer.playCard(leadingCard.getSuit());
 
         cout << currentPlayer.getName() <<
-            " played " << playedCard.getRank() << " of " << playedCard.getSuit() << endl;
+            ": " << playedCard.getRank() << " of " << playedCard.getSuit() << " | ";
         // Add the played card to the trick and record the player who played it
         trick.Cards.push_back(playedCard);
         trick.Players.push_back(currentPlayer);
     }
+    cout << endl;
 
     return trick;
 }
@@ -176,7 +177,7 @@ void TrickPhase(vector<Player>& Players, Deck& deck, int& DealerIndex, Trick tri
         cout << "\nTrick #" << i << "\n---------------" << endl;
         Card firstPlayed = Players[toTheLeft(DealerIndex, Players)].getHand()[0];
         cout << Players[toTheLeft(DealerIndex, Players)].getName() <<
-            " played " << firstPlayed.getRank() << " of " << firstPlayed.getSuit() << endl;
+            ": " << firstPlayed.getRank() << " of " << firstPlayed.getSuit() << " | ";
 
         trick = playTrick(Players, trick, firstPlayed);
 
@@ -185,20 +186,22 @@ void TrickPhase(vector<Player>& Players, Deck& deck, int& DealerIndex, Trick tri
         Player winningPlayer = trick.Players[winnerIndex];
 
 
-        if (trick.CheckForTrump()) {
-            cout << "A trump card was played this trick" << endl;
-        }
-        else //If a trump card was not played the point goes to the highest card
-        {
-            cout << "A trump card was not played this trick" << endl;
-            // Award a point to the player who played the highest card
-            //trick.Players[winnerIndex].increaseScore();
-        }
+        if (trick.CheckForTrump()) { cout << "A trump card was played this trick" << endl; }
+        else{ cout << "A trump card was not played this trick" << endl; }
 
         cout << "The winning card is " << trick.Cards[winnerIndex].getRank() << " of " << trick.Cards[winnerIndex].getSuit() << " played by " << winningPlayer.getName() << endl;
         Players[winnerIndex].increaseScore();
 
         DealerIndex = toTheLeft(DealerIndex, Players);
+    }
+}
+
+void PointPhase(vector<Player>& Players)
+{
+    cout << "\Points " << "\n---------------" << endl;
+    for (int i = 0; i < Players.size(); i++)
+    {
+        cout << Players[i].getName() << ": " << Players[i].getScore() << endl;
     }
 }
 
@@ -233,13 +236,8 @@ int main()
     //Trick
     TrickPhase(Players, deck, DealerIndex, trick);
 
-    cout << "\Points " << "\n---------------" << endl;
-    for (int i = 0; i < Players.size(); i++)
-    {
-        cout << Players[i].getName() << ": " << Players[i].getScore() << endl;
-    }
-
-
+    //Points
+    PointPhase(Players);
 
     return 0;
 }
