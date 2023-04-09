@@ -33,6 +33,31 @@ bool Trick::CheckForTrump() {
 }
 
 
+vector<Player> IniatalizePlayers() 
+{
+    Player player1("Arron"); 
+    Player player2("Brooklyn"); 
+    Player player3("Caroline"); 
+    Player player4("Damian"); 
+
+    Team Team1(player1, player2, "Team AB"); 
+    Team Team2(player3, player4, "Team CD"); 
+
+
+    vector<Player> Players; 
+    Players.push_back(Team1.getPlayers()[0]); 
+    Players.push_back(Team2.getPlayers()[1]); 
+    Players.push_back(Team1.getPlayers()[1]); 
+    Players.push_back(Team2.getPlayers()[0]);
+
+    std::cout << "Team 1: "
+        << Team1.getPlayers()[0].getName() << " & " << Team1.getPlayers()[1].getName() << "\n"
+        << "Team 2: "
+        << Team2.getPlayers()[0].getName() << " & " << Team2.getPlayers()[1].getName() << std::endl;
+
+    return Players; 
+}
+
 void DealCards(int CardsPerPerson, Deck& deck, Player& player1, Player& player2, Player& player3, Player& player4) {
     // Deal CardsPerPerson cards to each player and set the trump card
     for (int i = 0; i < CardsPerPerson; i++) {
@@ -147,41 +172,7 @@ int toTheLeft(int current, vector<Player> Players)
 
 int main() 
 {
-
-    //Initalize Players
-    Player player1("Arron");
-    Player player2("Brooklyn");
-    Player player3("Caroline");
-    Player player4("Damian");
-
-    /*cout << player1.getName() << ": " << player1.getScore() << std::endl;
-    cout << player2.getName() << ": " << player2.getScore() << std::endl;
-
-    player1.incrementScore();
-    player2.incrementScore();
-
-    std::cout << player1.getName() << ": " << player1.getScore() << std::endl;
-    std::cout << player2.getName() << ": " << player2.getScore() << std::endl;*/
-
-    Team Team1(player1, player2, "Team AB");
-    Team Team2(player3, player4, "Team CD");
-
-    /*std::cout << team.getName() << ": " << team.getScore() << std::endl;
-
-    team.increaseScore();
-
-    std::cout << team.getName() << ": " << team.getScore() << std::endl;*/
-
-    vector<Player> Players;
-    Players.push_back(Team1.getPlayers()[0]);
-    Players.push_back(Team2.getPlayers()[1]);
-    Players.push_back(Team1.getPlayers()[1]);
-    Players.push_back(Team2.getPlayers()[0]);
-    
-    std::cout << "Team 1: " 
-        << Team1.getPlayers()[0].getName() << " & " << Team1.getPlayers()[1].getName() << "\n"
-        << "Team 2: " 
-        << Team2.getPlayers()[0].getName() << " & " << Team2.getPlayers()[1].getName() << std::endl;
+    vector<Player> Players = IniatalizePlayers();
 
     Deck deck;
 
@@ -202,12 +193,6 @@ int main()
 
     cout << "\nBidding Phase\n---------------" << endl;
     if (Bid(Players) == false) { Redeal(Players, deck); }
-
-    //int NumTrick = 1;
-    //cout << "\nTrick #"<< NumTrick << "\n---------------" << endl;
-    //Card firstPlayed = Players[toTheLeft(DealerIndex, Players)].getHand()[0];
-    //cout << Players[toTheLeft(DealerIndex, Players)].getName() <<
-    //    " played " << firstPlayed.getRank() << " of " << firstPlayed.getSuit() << endl;
 
 
     for (int i = 1; i <= 5; i++) //Run through 5 tricks
@@ -231,12 +216,22 @@ int main()
         {
             cout << "A trump card was not played this trick" << endl;
             // Award a point to the player who played the highest card
-            trick.Players[winnerIndex].increaseScore();
-
-            cout << "The winning card is " << trick.Cards[winnerIndex].getRank() << " of " << trick.Cards[winnerIndex].getSuit() << " played by " << winningPlayer.getName() << endl;
-            winningPlayer.increaseScore();
+            //trick.Players[winnerIndex].increaseScore();
         }
+
+        cout << "The winning card is " << trick.Cards[winnerIndex].getRank() << " of " << trick.Cards[winnerIndex].getSuit() << " played by " << winningPlayer.getName() << endl;
+        Players[winnerIndex].increaseScore();
+
+        DealerIndex = toTheLeft(DealerIndex, Players);
     }
+
+    cout << "\Points " << "\n---------------" << endl;
+    for (int i = 0; i < Players.size(); i++)
+    {
+        cout << Players[i].getName() << ": " << Players[i].getScore() << endl;
+    }
+
+
 
     return 0;
 }
