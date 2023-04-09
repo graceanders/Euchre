@@ -11,27 +11,9 @@
 #include "Card.h"
 #include "Deck.h"
 #include "Euchre.h"
+#include "Trick.h"
 
 using namespace std;
-
-class Trick {
-public:
-    vector<Card> Cards;
-    vector<Card> TrumpCards;
-    vector<Player> Players;
-    Card trump;
-    bool CheckForTrump();
-};
-
-bool Trick::CheckForTrump() {
-    for (const auto& card : Cards) {
-        if (card.getSuit() == trump.getSuit()) {
-            TrumpCards.push_back(card);
-        }
-    }
-    return !TrumpCards.empty();
-}
-
 
 vector<Player> IniatalizePlayers() 
 {
@@ -68,26 +50,28 @@ void DealCards(int CardsPerPerson, Deck& deck, Player& player1, Player& player2,
     }
 }
 
-bool Bid(vector<Player> Players)
+bool Bid(vector<Player> Players)// Refrenced: https://stackoverflow.com/questions/7560114/random-number-c-in-some-range/7560564#7560564
 {
-    srand(time(NULL));
+    random_device rd; 
+    mt19937 gen(rd()); 
+    uniform_int_distribution<> dis(1, 100); 
 
-    for (int i = 0; i < Players.size(); i ++ ) {
+    for (int i = 0; i < Players.size(); i++) {
 
-        int random_num = rand() % 100 + 1;
+        int random_num = dis(gen);
         if (random_num > 50) {
-            cout << Players[i].getName() << " called trump" << endl;
+            cout << Players[i].getName() << " called trump" << endl; 
             return true;
         }
         else
-            cout << Players[i].getName() << " passed" << endl;
+            cout << Players[i].getName() << " passed" << endl; 
     }
 
     cout << "No players called trump" << endl;
     return false;
 }
 
-void Redeal(vector<Player> Players, Deck deck)
+void Redeal(vector<Player> Players, Deck deck, Trick trick)
 {
     //Clear all of the players hands
     for (int i = 0; i < Players.size(); i++) 
@@ -101,6 +85,9 @@ void Redeal(vector<Player> Players, Deck deck)
     DealCards(2, deck, Players[0], Players[1], Players[2], Players[3]); //Deals 2 cards
 
     DealCards(3, deck, Players[0], Players[1], Players[2], Players[3]); //Deal 3 cards
+
+    trick.trump = deck.DrawCard();
+    cout << "\nTrump = " << trick.trump.getSuit() << std::endl;
 
     Bid(Players);
 }
@@ -170,31 +157,20 @@ int toTheLeft(int current, vector<Player> Players)
     return current;
 }
 
-int main() 
+void DealPhase(vector<Player>& Players, Deck& deck, int& DealerIndex, Trick trick)
 {
-    vector<Player> Players = IniatalizePlayers();
+    cout << "\n" << Players[DealerIndex].getName() << " is dealing" << endl;
 
-    Deck deck;
+    DealCards(2, deck, Players[0], Players[1], Players[2], Players[3]); //Deals 2 cards 
 
-    // Shuffle the deck
-    deck.Shuffle();
-
-    cout << "\nDealing Phase\n---------------" << endl;
-    int DealerIndex = 0;
-    cout << Players[DealerIndex].getName() << " is dealing" << endl;
-
-    Trick trick;
-    DealCards(2, deck, Players[0], Players[1], Players[2], Players[3]); //Deals 2 cards
-
-    DealCards(3, deck, Players[0], Players[1], Players[2], Players[3]); //Deal 3 cards
+    DealCards(3, deck, Players[0], Players[1], Players[2], Players[3]); //Deal 3 cards 
 
     trick.trump = deck.DrawCard();
-    cout<<"\nTrump = "<< trick.trump.getSuit() << std::endl;
+    cout << "\nTrump = " << trick.trump.getSuit() << std::endl;
+}
 
-    cout << "\nBidding Phase\n---------------" << endl;
-    if (Bid(Players) == false) { Redeal(Players, deck); }
-
-
+void TrickPhase(vector<Player>& Players, Deck& deck, int& DealerIndex, Trick trick)
+{
     for (int i = 1; i <= 5; i++) //Run through 5 tricks
     {
         cout << "\nTrick #" << i << "\n---------------" << endl;
@@ -224,6 +200,38 @@ int main()
 
         DealerIndex = toTheLeft(DealerIndex, Players);
     }
+}
+
+int main() 
+{
+    vector<Player> Players = IniatalizePlayers();
+
+    Deck deck;
+    deck.Shuffle();
+
+    int DealerIndex = 0;
+    Trick trick;
+
+    //Deal
+    DealPhase(Players, deck, DealerIndex, trick); 
+
+    //Bid
+    cout << "\nBidding Phase\n---------------" << endl;
+
+    //if (Bid(Players) == false) { Redeal(Players, deck); }
+    
+
+    bool hasBid;
+    do {
+        hasBid = Bid(Players);
+        if (!hasBid) {
+            Redeal(Players, deck, trick);
+        }
+    } while (!hasBid);
+
+
+    //Trick
+    TrickPhase(Players, deck, DealerIndex, trick);
 
     cout << "\Points " << "\n---------------" << endl;
     for (int i = 0; i < Players.size(); i++)
@@ -235,3 +243,5 @@ int main()
 
     return 0;
 }
+
+
