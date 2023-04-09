@@ -22,6 +22,8 @@ public:
     int getScore() const;
     void increaseScore();
 
+    void resetScore();
+
     void setHand(std::vector<Card> hand);
     void addCardToHand(Card card);
     void clearHand(std::vector<Card> hand);

@@ -21,4 +21,9 @@ std::vector<Player> Team::getPlayers() const
     return players;
 }
 
+int Team::getCombindedPlayersScore(Player player1, Player player2) 
+{
+    return player1.getScore() + player2.getScore();
+}
+
 

@@ -14,6 +14,10 @@
 #include "Trick.h"
 
 using namespace std;
+ 
+vector<Player> Players;
+Team Team1;
+Team Team2;
 
 vector<Player> IniatalizePlayers() 
 {
@@ -22,11 +26,9 @@ vector<Player> IniatalizePlayers()
     Player player3("Caroline"); 
     Player player4("Damian"); 
 
-    Team Team1(player1, player2, "Team AB"); 
-    Team Team2(player3, player4, "Team CD"); 
-
-
-    vector<Player> Players; 
+    Team1 = Team(player1, player2, "Team AB"); 
+    Team2 = Team(player3, player4, "Team CD"); 
+    
     Players.push_back(Team1.getPlayers()[0]); 
     Players.push_back(Team2.getPlayers()[1]); 
     Players.push_back(Team1.getPlayers()[1]); 
@@ -120,6 +122,7 @@ Trick playTrick(vector<Player>& players, Trick& trick, const Card& leadingCard)
     return trick;
 }
 
+
 // Define the function to calculate the winner of a trick
 int calculateWinner(Trick trick) {
     int highestValue = 0;
@@ -158,6 +161,10 @@ int toTheLeft(int current, vector<Player> Players)
     return current;
 }
 
+
+
+//Phases
+
 void DealPhase(vector<Player>& Players, Deck& deck, int& DealerIndex, Trick trick)
 {
     cout << "\n" << Players[DealerIndex].getName() << " is dealing" << endl;
@@ -185,7 +192,6 @@ void TrickPhase(vector<Player>& Players, Deck& deck, int& DealerIndex, Trick tri
         int winnerIndex = calculateWinner(trick);
         Player winningPlayer = trick.Players[winnerIndex];
 
-
         if (trick.CheckForTrump()) { cout << "A trump card was played this trick" << endl; }
         else{ cout << "A trump card was not played this trick" << endl; }
 
@@ -198,7 +204,7 @@ void TrickPhase(vector<Player>& Players, Deck& deck, int& DealerIndex, Trick tri
 
 void PointPhase(vector<Player>& Players)
 {
-    cout << "\Points " << "\n---------------" << endl;
+    cout << "\nPoints " << "\n---------------" << endl;
     for (int i = 0; i < Players.size(); i++)
     {
         cout << Players[i].getName() << ": " << Players[i].getScore() << endl;
@@ -207,39 +213,58 @@ void PointPhase(vector<Player>& Players)
 
 int main() 
 {
-    vector<Player> Players = IniatalizePlayers();
+    Players = IniatalizePlayers();
 
-    Deck deck;
-    deck.Shuffle();
-
-    int DealerIndex = 0;
-    Trick trick;
-
-    //Deal
-    DealPhase(Players, deck, DealerIndex, trick); 
-
-    //Bid
-    cout << "\nBidding Phase\n---------------" << endl;
-
-    //if (Bid(Players) == false) { Redeal(Players, deck); }
-    
-
-    bool hasBid;
-    do {
-        hasBid = Bid(Players);
-        if (!hasBid) {
-            Redeal(Players, deck, trick);
+    while (Team1.getScore() < 10 && Team2.getScore() < 10) 
+    {
+        for (int i = 0; i < Players.size(); i++)
+        { 
+            Players[i].resetScore(); 
         }
-    } while (!hasBid);
+
+        Deck deck;
+        deck.Shuffle();
+
+        int DealerIndex = 0;
+        Trick trick;
+
+        //Deal
+        DealPhase(Players, deck, DealerIndex, trick);
+
+        //Bid
+        cout << "\nBidding Phase\n---------------" << endl;
+        bool hasBid;
+        do {
+            hasBid = Bid(Players);
+            if (!hasBid) { Redeal(Players, deck, trick); }
+        } while (!hasBid);
 
 
-    //Trick
-    TrickPhase(Players, deck, DealerIndex, trick);
+        //Trick
+        TrickPhase(Players, deck, DealerIndex, trick);
 
-    //Points
-    PointPhase(Players);
+        //Points
+        PointPhase(Players);
+
+        int Team1Points = Team1.getCombindedPlayersScore(Players[0], Players[2]);
+        int Team2Points = Team2.getCombindedPlayersScore(Players[1], Players[3]);
+
+        if (Team1Points > Team2Points)
+        {
+            cout << "\nTeam 1 won " << Team1Points << " tricks, and won that round" << endl;
+            Team1.increaseScore();
+        }
+        else
+        {
+            cout << "\nTeam 2 won " << Team2Points << " tricks, and won that round" << endl;
+            Team2.increaseScore();
+        }
+
+        cout << "Team 1 Score: " << Team1.getScore() << " | Team 2 Score: " << Team2.getScore() << endl;
+    }
+    
+    if (Team1.getScore() == 10) { cout << "\nTeam 1 won!" << endl; }
+    else{ cout << "\nTeam 2 won!" << endl; }
 
     return 0;
 }
-
-

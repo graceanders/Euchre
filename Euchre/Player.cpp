@@ -1,5 +1,4 @@
 #include <vector>
-
 #include "Player.h"
 #include "Card.h"
 #include <random>
@@ -23,6 +22,7 @@ std::string Player::getName() const { return name; }
 
 int Player::getScore() const { return score; }
 void Player::increaseScore() { score++; }
+void Player::resetScore() { score = 0; }
 
 void Player::setHand(std::vector<Card>hand) { this->hand = hand; }
 void Player::addCardToHand(Card card) { hand.push_back(card); }
