@@ -20,6 +20,7 @@ Team Team1;
 Team Team2;
 
 bool TeamOneCalledSuit;
+int DealerIndex = 0;
 
 vector<Player> IniatalizePlayers() 
 {
@@ -44,7 +45,21 @@ vector<Player> IniatalizePlayers()
         << "Team 2: "
         << Team2.getPlayers()[0].getName() << " & " << Team2.getPlayers()[1].getName() << std::endl;
 
-    return Players; 
+    return Players;  
+}
+
+
+int toTheLeft(int current, vector<Player> Players)
+{
+    int next = current;
+    next++;
+    if (next < Players.size()) {
+        current++;
+    }
+    else
+        current = 0;
+
+    return current;
 }
 
 void DealCards(int CardsPerPerson, Deck& deck, Player& player1, Player& player2, Player& player3, Player& player4) {
@@ -57,25 +72,28 @@ void DealCards(int CardsPerPerson, Deck& deck, Player& player1, Player& player2,
     }
 }
 
-bool Bid(vector<Player> Players)// Refrenced: https://stackoverflow.com/questions/7560114/random-number-c-in-some-range/7560564#7560564
+bool Bid(vector<Player> Players, int DealerIndex)// Refrenced: https://stackoverflow.com/questions/7560114/random-number-c-in-some-range/7560564#7560564
 {
     random_device rd; 
     mt19937 gen(rd()); 
     uniform_int_distribution<> dis(1, 100); 
 
+    int next = DealerIndex + 1;
+
     for (int i = 0; i < Players.size(); i++) {
 
         int random_num = dis(gen);
         if (random_num > 50) {
-            cout << Players[i].getName() << " called trump" << endl; 
-            if (Players[i].getTeamOne() == true) 
+            cout << Players[next].getName() << " called trump" << endl; 
+            if (Players[next].getTeamOne() == true)
             { TeamOneCalledSuit = true; }
-            if (Players[i].getTeamOne() == false) 
+            if (Players[next].getTeamOne() == false)
             { TeamOneCalledSuit = false; }
             return true;
         }
         else
-            cout << Players[i].getName() << " passed" << endl; 
+            cout << Players[next].getName() << " passed" << endl; 
+        next = toTheLeft(next, Players); 
     }
 
     cout << "No players called trump" << endl;
@@ -100,7 +118,7 @@ void Redeal(vector<Player> Players, Deck deck, Trick trick)
     trick.trump = deck.DrawCard();
     cout << "\nTrump = " << trick.trump.getSuit() << std::endl;
 
-    Bid(Players);
+    Bid(Players, DealerIndex);
 }
 
 Trick playTrick(vector<Player>& players, Trick& trick, const Card& leadingCard)
@@ -157,21 +175,6 @@ int calculateWinner(Trick trick) {
     return winnerIndex;
 }
 
-int toTheLeft(int current, vector<Player> Players)
-{
-    int next = current;
-    next++;
-    if (next < Players.size()) {
-        current++;
-    }
-    else
-        current = 0;
-
-    return current;
-}
-
-
-
 //Phases
 
 void DealPhase(vector<Player>& Players, Deck& deck, int& DealerIndex, Trick trick)
@@ -220,7 +223,6 @@ void PointPhase(vector<Player>& Players)
     }
 }
 
-int DealerIndex = 0;
 int main() 
 {
     Players = IniatalizePlayers();
@@ -244,7 +246,7 @@ int main()
         cout << "\nBidding Phase\n---------------" << endl;
         bool hasBid;
         do {
-            hasBid = Bid(Players);
+            hasBid = Bid(Players, DealerIndex);
             if (!hasBid) { Redeal(Players, deck, trick); }
         } while (!hasBid);
 
