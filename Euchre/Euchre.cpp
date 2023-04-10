@@ -49,15 +49,30 @@ vector<Player> IniatalizePlayers()
 }
 
 
-int toTheLeft(int current, vector<Player> Players)
+int toTheLeft(int current, vector<Player>& Players)
 {
     int next = current;
     next++;
-    if (next < Players.size()) {
-        current++;
-    }
-    else
+    if (next >= 4) {
         current = 0;
+    }
+    else {
+        current = next;
+    }
+
+    return current;
+}
+
+int toTheRight(int current, vector<Player>& Players)
+{
+    int next = current;
+    next--;
+    if (next < 0) {
+        current = 3;
+    }
+    else {
+        current = next;
+    }
 
     return current;
 }
@@ -72,23 +87,26 @@ void DealCards(int CardsPerPerson, Deck& deck, Player& player1, Player& player2,
     }
 }
 
-bool Bid(vector<Player> Players, int DealerIndex)// Refrenced: https://stackoverflow.com/questions/7560114/random-number-c-in-some-range/7560564#7560564
+bool Bid(vector<Player> Players)// Refrenced: https://stackoverflow.com/questions/7560114/random-number-c-in-some-range/7560564#7560564
 {
     random_device rd; 
     mt19937 gen(rd()); 
     uniform_int_distribution<> dis(1, 100); 
 
-    int next = DealerIndex + 1;
+    int next = toTheLeft(DealerIndex, Players);
 
     for (int i = 0; i < Players.size(); i++) {
+        DealerIndex = toTheLeft(DealerIndex, Players);
 
         int random_num = dis(gen);
         if (random_num > 50) {
             cout << Players[next].getName() << " called trump" << endl; 
+
             if (Players[next].getTeamOne() == true)
             { TeamOneCalledSuit = true; }
             if (Players[next].getTeamOne() == false)
             { TeamOneCalledSuit = false; }
+
             return true;
         }
         else
@@ -118,10 +136,10 @@ void Redeal(vector<Player> Players, Deck deck, Trick trick)
     trick.trump = deck.DrawCard();
     cout << "\nTrump = " << trick.trump.getSuit() << std::endl;
 
-    Bid(Players, DealerIndex);
+    Bid(Players);
 }
 
-Trick playTrick(vector<Player>& players, Trick& trick, const Card& leadingCard)
+Trick playTrick(Trick& trick, const Card& leadingCard, int next)
 {
     // Clear the cards from the previous trick
     trick.Cards.clear();
@@ -129,13 +147,10 @@ Trick playTrick(vector<Player>& players, Trick& trick, const Card& leadingCard)
 
     // Add the leading card to the trick
     trick.Cards.push_back(leadingCard);
-    trick.Players.push_back(players[0]);
+    trick.Players.push_back(Players[toTheRight(next, Players)]);
 
-    int currentPlayerIndex = 1;
-
-    for (int i = 0; i < 3; i++) {
-        currentPlayerIndex = (currentPlayerIndex + 1) % 4;
-        Player& currentPlayer = players[currentPlayerIndex];
+    for (int i = 1; i < 4; i++) {
+        Player& currentPlayer = Players[next];
         Card playedCard = currentPlayer.playCard(leadingCard.getSuit());
 
         cout << currentPlayer.getName() <<
@@ -143,8 +158,9 @@ Trick playTrick(vector<Player>& players, Trick& trick, const Card& leadingCard)
         // Add the played card to the trick and record the player who played it
         trick.Cards.push_back(playedCard);
         trick.Players.push_back(currentPlayer);
+
+        next = toTheLeft(next, Players);
     }
-    cout << endl;
 
     return trick;
 }
@@ -194,18 +210,20 @@ void TrickPhase(vector<Player>& Players, Deck& deck, int& DealerIndex, Trick tri
     for (int i = 1; i <= 5; i++) //Run through 5 tricks
     {
         cout << "\nTrick #" << i << "\n---------------" << endl;
-        Card firstPlayed = Players[toTheLeft(DealerIndex, Players)].getHand()[0];
-        cout << Players[toTheLeft(DealerIndex, Players)].getName() <<
+        if (DealerIndex == 4) { DealerIndex = 0; }
+        Card firstPlayed = Players[DealerIndex].getHand()[0];
+        cout << Players[DealerIndex].getName() <<
             ": " << firstPlayed.getRank() << " of " << firstPlayed.getSuit() << " | ";
 
-        trick = playTrick(Players, trick, firstPlayed);
+        int next = toTheLeft(DealerIndex, Players);
+        trick = playTrick(trick, firstPlayed, next); 
 
         // Determine the winner of the trick using the calculateWinner function
         int winnerIndex = calculateWinner(trick);
         Player winningPlayer = trick.Players[winnerIndex];
 
-        if (trick.CheckForTrump()) { cout << "A trump card was played this trick" << endl; }
-        else{ cout << "A trump card was not played this trick" << endl; }
+        if (trick.CheckForTrump()) { cout << "\nA trump card was played this trick" << endl; }
+        else{ cout << "\nA trump card was not played this trick" << endl; }
 
         cout << "The winning card is " << trick.Cards[winnerIndex].getRank() << " of " << trick.Cards[winnerIndex].getSuit() << " played by " << winningPlayer.getName() << endl;
         Players[winnerIndex].increaseScore();
@@ -246,11 +264,11 @@ int main()
         cout << "\nBidding Phase\n---------------" << endl;
         bool hasBid;
         do {
-            hasBid = Bid(Players, DealerIndex);
+            hasBid = Bid(Players);
             if (!hasBid) { Redeal(Players, deck, trick); }
         } while (!hasBid);
 
-
+        DealerIndex = toTheLeft(DealerIndex, Players);
         //Trick
         TrickPhase(Players, deck, DealerIndex, trick);
 
