@@ -19,6 +19,8 @@ vector<Player> Players;
 Team Team1;
 Team Team2;
 
+bool TeamOneCalledSuit;
+
 vector<Player> IniatalizePlayers() 
 {
     Player player1("Arron"); 
@@ -33,6 +35,9 @@ vector<Player> IniatalizePlayers()
     Players.push_back(Team2.getPlayers()[1]); 
     Players.push_back(Team1.getPlayers()[1]); 
     Players.push_back(Team2.getPlayers()[0]);
+
+    Players[0].onTeamOne();
+    Players[2].onTeamOne();
 
     std::cout << "Team 1: "
         << Team1.getPlayers()[0].getName() << " & " << Team1.getPlayers()[1].getName() << "\n"
@@ -63,6 +68,10 @@ bool Bid(vector<Player> Players)// Refrenced: https://stackoverflow.com/question
         int random_num = dis(gen);
         if (random_num > 50) {
             cout << Players[i].getName() << " called trump" << endl; 
+            if (Players[i].getTeamOne() == true) 
+            { TeamOneCalledSuit = true; }
+            if (Players[i].getTeamOne() == false) 
+            { TeamOneCalledSuit = false; }
             return true;
         }
         else
@@ -211,6 +220,7 @@ void PointPhase(vector<Player>& Players)
     }
 }
 
+int DealerIndex = 0;
 int main() 
 {
     Players = IniatalizePlayers();
@@ -225,7 +235,6 @@ int main()
         Deck deck;
         deck.Shuffle();
 
-        int DealerIndex = 0;
         Trick trick;
 
         //Deal
@@ -253,14 +262,26 @@ int main()
         {
             cout << "\nTeam 1 won " << Team1Points << " tricks, and won that round" << endl;
             Team1.increaseScore();
+            if (TeamOneCalledSuit == false){ 
+                Team2.decreaseScore(); 
+                cout << "Team 2 called suit but lost the hand so they loose a point\n" << endl;
+            }
         }
-        else
+
+        if (Team2Points > Team1Points )
         {
             cout << "\nTeam 2 won " << Team2Points << " tricks, and won that round" << endl;
             Team2.increaseScore();
+            if (TeamOneCalledSuit == true) {
+                Team1.decreaseScore();
+                cout << "Team 1 called suit but lost the hand so they loose a point\n" << endl;
+            }
+
         }
 
         cout << "Team 1 Score: " << Team1.getScore() << " | Team 2 Score: " << Team2.getScore() << endl;
+
+        DealerIndex = toTheLeft(DealerIndex, Players);
     }
     
     if (Team1.getScore() == 10) { cout << "\nTeam 1 won!" << endl; }

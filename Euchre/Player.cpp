@@ -9,6 +9,7 @@ Player::Player()
     name = "Unnamed";
     //Each player needs to have a score realting to trick's won
     score = 0;
+    teamOne = false;
 }
 
 Player::Player(std::string name) 
@@ -73,6 +74,9 @@ Card Player::playCard(std::string suitLed)
     hand.erase(hand.begin() + cardIndex);
     return cardPlayed;
 }
+
+void Player::onTeamOne() { this->teamOne = true; }
+bool Player::getTeamOne() { return this->teamOne; } 
 
 
 

@@ -11,6 +11,7 @@ private:
     std::string name;
     int score;
     std::vector<Card> hand;
+    bool teamOne;
 
 public:
     Player();
@@ -31,6 +32,8 @@ public:
     std::vector<Card> getHand() const;
     void printPlayerHand() const;
     Card playCard(std::string suitLed);
+    void onTeamOne();
+    bool getTeamOne();
 };
 
 #endif

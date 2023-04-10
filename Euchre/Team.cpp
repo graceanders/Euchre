@@ -14,6 +14,7 @@ std::string Team::getName() { return name; }
 
 int Team::getScore() { return score; }
 void Team::increaseScore() { score++; }
+void Team::decreaseScore() { score--; }
 
 std::vector<Player> Team::getPlayers() const
 {

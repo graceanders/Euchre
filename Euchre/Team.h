@@ -15,6 +15,7 @@ public:
     std::string getName();
     int getScore();
     void increaseScore();
+    void decreaseScore();
     std::vector<Player> getPlayers() const;
     int getCombindedPlayersScore(Player player1, Player player2);
 };
